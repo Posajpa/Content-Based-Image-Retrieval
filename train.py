@@ -4,6 +4,7 @@ import torch
 from pathlib import Path
 import yaml
 from model import VGG
+from model import ResNet
 from dataset import get_train_data
 from utils import seed_everything
 
@@ -47,7 +48,8 @@ class TransferLearningTrainer:
             train_loss, train_accuracy = self.train_step(net, train_loader)
             val_loss, val_accuracy = self.val_step(net, val_loader)
             print(
-                'Epoch {}: Train loss {:.4f}, Train acc {:.4f}, Valid loss {:.4f}, Valid acc {:.4f}, Best acc {:.4f}'.format(
+                '\tEpoch {}: Training loss {:.4f}, Training accuracy {:.4f}, Validation loss {:.4f}, '
+                'Validation accuracy {:.4f}, Best accuracy {:.4f}'.format(
                     e + 1, train_loss, train_accuracy, val_loss, val_accuracy, best_val_accuracy))
             # Save the model checkpoints
             if e % self.save_checkpoint_every == 0 or e == (
@@ -72,13 +74,11 @@ class TransferLearningTrainer:
                 self.trigger = 0
 
         end = time.time()
-        print('duration', end - start)
-        logging.basicConfig(filename='logs/log_vgg16.log',
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d -- %(name)s -- %(levelname)s -- %(message)s',
-                            datefmt='%d - %m - %Y %H:%M:%S',
+        print('\tTraining duration: ', end - start)
+        logging.basicConfig(filename='logs/logs.txt',
+                            format="%(asctime)s %(message)s",
                             level=logging.INFO)
-        logging.info(f"epochs = {self.max_epochs}, learning rate = {self.learn_rate}, best train and best loss:  {round(best_val_accuracy, 3)}, {round(best_val_loss, 3)}")
+        logging.info(f"Model = {opt.model_name}, epochs = {self.max_epochs}, learning rate = {self.learn_rate}, best train & loss:  {round(best_val_accuracy, 3)}, {round(best_val_loss, 3)}")
 
     def train_step(self, net, train_loader):
         net.train()
@@ -124,8 +124,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser("Training Parser")
     # Misc
-    parser.add_argument("--config_path", required=True, type=str, help="Path to the configuration file")
-    parser.add_argument("--run_name", required=True, type=str, help="Name of this training run")
+    parser.add_argument("--config_path", required=False, type=str, default="./config/config.yaml",
+                        help="Path to the configuration file")
+    parser.add_argument("--model_name", choices=["VGG16", "ResNet"], required=True, help="Name of the model used")
     parser.add_argument("--checkpoint_path", required=False, type=str, default="./checkpoints",
                         help="path where the checkpoints will be stored")
     opt = parser.parse_args()  # parse the arguments, this creates a dictionary name : value
@@ -139,18 +140,25 @@ if __name__ == "__main__":
         print(f"\tConfiguration file loaded from: {opt.config_path}")
 
     # Create checkpoint path
-    checkpoint_path = Path(opt.checkpoint_path)
+    checkpoint_path = Path(opt.checkpoint_path) / opt.model_name
     checkpoint_path.mkdir(parents=True, exist_ok=True)
+    print(f"\tCheckpoint file created in: {opt.checkpoint_path}")
+    print('-----------------------------------------------------')
     # save a copy of the config file being used, to be sure. Append the command line parameters
     config.update({'command_line': vars(opt)})
-    with open(checkpoint_path / "VGG16.yaml", "w") as f:
+    with open(checkpoint_path / "config.yaml", "w") as f:
         yaml.dump(config, f)
 
     # Get dataset
     train_loader, val_loader, out_layer = get_train_data(config)
 
     # Create the model
-    model = VGG(config, out_layer)
+    if opt.model_name == "VGG16":
+        model = VGG(config, out_layer)
+    if opt.model_name == "ResNet":
+        model = ResNet(config, out_layer)
+    print(f"\tModel selected: " + opt.model_name)
+    print('-----------------------------------------------------')
     model.to(config["device"])
 
     trainer = TransferLearningTrainer(config)
