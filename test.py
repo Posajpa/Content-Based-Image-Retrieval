@@ -7,6 +7,7 @@ import torch
 from pathlib import Path
 import yaml
 from model import VGG
+from model import ResNet
 from utils import seed_everything
 
 
@@ -17,16 +18,17 @@ def feature_extraction(config, query_loader, gallery_loader, model):
     with torch.no_grad():
         for data, names in query_loader:
             data = data.to(config["device"])
-            output = model.get_feature_layer(data).numpy().to(config["device"])
+            output = model.get_feature_layer(data).cpu().numpy()
 
             for i, j in zip(names, output):
                 feature_query[i] = j
         for data, names in gallery_loader:
             data = data.to(config["device"])
-            output = model.get_feature_layer(data).numpy().to(config["device"])
+            output = model.get_feature_layer(data).cpu().numpy()
             for i, j in zip(names, output):
                 feature_gallery[i] = j
     return feature_query, feature_gallery
+
 
 def find_distance(array1, array2):
     return np.linalg.norm(array1 - array2)
@@ -67,7 +69,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser("Testing Parser")
     # Misc
-    parser.add_argument("--checkpoint_path", required=True, type=str, help="Path of the checkpoint to test.")
+    parser.add_argument("--model_name", choices=["VGG16", "ResNet"], required=True, help="Name of the model used")
+    parser.add_argument("--checkpoint_path", required=False, type=str, default="./checkpoints",
+                        help="Path of the checkpoints to test.")
     # Dataset parameters
     opt = parser.parse_args()  # parse the arguments, this creates a dictionary name : value
 
@@ -75,14 +79,17 @@ if __name__ == "__main__":
     seed_everything()
 
     # === Load the configuration file
-    checkpoint_path = Path(opt.checkpoint_path)
-    config_path = checkpoint_path / "VGG16.yaml"
+    checkpoint_path = Path(opt.checkpoint_path) / opt.model_name
+    config_path = checkpoint_path / "config.yaml"
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
         print(f"\tConfiguration file loaded from: {config_path}")
 
     # Create the model & Load the weights
-    model = VGG(config, 16)
+    if opt.model_name == "VGG16":
+        model = VGG(config, config["out_layer_size"])
+    if opt.model_name == "ResNet":
+        model = ResNet(config, config["out_layer_size"])
     ckpt = torch.load(checkpoint_path / "best.pth", map_location="cpu")
     model.load_state_dict(ckpt)
     model.to(config["device"])
@@ -90,15 +97,14 @@ if __name__ == "__main__":
     query_loader, gallery_loader = get_test_data(config)
     # Get feature extractions
     feature_query, feature_gallery = feature_extraction(config=config, query_loader=query_loader, gallery_loader=gallery_loader, model=model)
-
     # similarity for each query img to feature gallery images
     top_n = 20
     result = find_similarity(feature_query, feature_gallery, top_n)
 
     # preparation for submit
     query_random_guess = dict()
-    query_random_guess['groupname'] = "Capybara"
-    query_random_guess["images"] = result
+    query_random_guess['Group name'] = "Capybara"
+    query_random_guess["Images"] = result
     with open('data.json', 'w') as f:
         json.dump(query_random_guess, f)
 
