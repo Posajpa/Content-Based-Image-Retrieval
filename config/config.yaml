@@ -3,7 +3,7 @@ pretrained: True
 device: "cuda"
 learning_rate: 0.0002
 max_epochs: 8
-save_checkpoint_every: 1
+save_checkpoint_every: 5
 early_stopping_patience: 8
 
 train_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/Dataset1/Face Images/Final Training Images"
