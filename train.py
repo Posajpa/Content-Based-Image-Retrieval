@@ -51,10 +51,10 @@ class TransferLearningTrainer:
                 '\tEpoch {}: Training loss {:.4f}, Training accuracy {:.4f}, Validation loss {:.4f}, '
                 'Validation accuracy {:.4f}, Best accuracy {:.4f}'.format(
                     e + 1, train_loss, train_accuracy, val_loss, val_accuracy, best_val_accuracy))
-            # Save the model checkpoints
-            if e % self.save_checkpoint_every == 0 or e == (
-                    self.max_epochs - 1):  # if the current epoch is in the interval, or is the last epoch -> save
-                torch.save(net.state_dict(), self.checkpoint_path / f'epoch-{e}.pth')
+            # # Save the model checkpoints
+            # if e % self.save_checkpoint_every == 0 or e == (
+            #         self.max_epochs - 1):  # if the current epoch is in the interval, or is the last epoch -> save
+            #     torch.save(net.state_dict(), self.checkpoint_path / f'epoch-{e}.pth')
 
             # Update the best model so far
             if val_accuracy >= best_val_accuracy:
