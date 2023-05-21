@@ -7,6 +7,7 @@ from model import VGG
 from model import ResNet
 from dataset import get_train_data
 from utils import seed_everything
+from torchsummary import summary
 
 
 class TransferLearningTrainer:
@@ -139,18 +140,19 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
         print(f"\tConfiguration file loaded from: {opt.config_path}")
 
+    # Get dataset
+    train_loader, val_loader, out_layer = get_train_data(config)
+
     # Create checkpoint path
     checkpoint_path = Path(opt.checkpoint_path) / opt.model_name
     checkpoint_path.mkdir(parents=True, exist_ok=True)
     print(f"\tCheckpoint file created in: {opt.checkpoint_path}")
     print('-----------------------------------------------------')
-    # save a copy of the config file being used, to be sure. Append the command line parameters
+    # save a copy of the config file being used, to be sure. Append the command line parameters and out_layer
+    config.update({'out_layer_size': out_layer})
     config.update({'command_line': vars(opt)})
     with open(checkpoint_path / "config.yaml", "w") as f:
         yaml.dump(config, f)
-
-    # Get dataset
-    train_loader, val_loader, out_layer = get_train_data(config)
 
     # Create the model
     if opt.model_name == "VGG16":
@@ -158,6 +160,7 @@ if __name__ == "__main__":
     if opt.model_name == "ResNet":
         model = ResNet(config, out_layer)
     print(f"\tModel selected: " + opt.model_name)
+    summary(model)
     print('-----------------------------------------------------')
     model.to(config["device"])
 
