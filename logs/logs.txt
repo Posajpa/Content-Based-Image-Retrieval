@@ -1,0 +1,2 @@
+2023-05-21 20:26:17,859 Model = ResNet, epochs = 8, learning rate = 0.0002, best train & loss:  1.0, 0.001
+2023-05-21 20:27:47,043 Model = VGG16, epochs = 8, learning rate = 0.0002, best train & loss:  0.969, 0.008
