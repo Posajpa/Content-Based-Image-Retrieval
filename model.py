@@ -9,6 +9,7 @@ class VGG(nn.Module):
         self.net = models.vgg16(weights=weights)
         # remove the last FC layer
         num_output_feats = self.net.classifier[-1].in_features  # dim  of the features
+        # Initialize a new fully connected layer
         self.net.classifier[-1] = torch.nn.Linear(num_output_feats, out)
 
         for i, param in enumerate(self.net.features.parameters()):
@@ -25,4 +26,19 @@ class VGG(nn.Module):
     def get_feature_layer(self, x):
         x = self.base(x)
         # x = self.fc1(x)
+        return x
+
+class ResNet(nn.Module):
+    def __init__(self, config, out):
+        super(ResNet, self).__init__()
+        # Load a resnet18 from torchvision, either use pretrained weights or not
+        weights = "IMAGENET1K_V1" if config["pretrained"] else None
+        self.net = models.resnet18(weights=weights)
+        # remove the last FC layer
+        num_output_feats = self.net.fc.in_features   # dim  of the features
+        # Initialize a new fully connected layer
+        self.net.fc = torch.nn.Linear(num_output_feats, out)
+
+    def forward(self, x):
+        x = self.net(x)
         return x
