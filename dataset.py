@@ -6,6 +6,7 @@ import pandas as pd
 import PIL.Image as Image
 
 
+
 class FaceDataset(torch.utils.data.Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
         df = pd.read_csv(csv_file, delimiter=' ')
@@ -93,6 +94,7 @@ class competitionSet(torch.utils.data.Dataset):
 def get_test_data(config):
     query_set = competitionSet(config["query_data"])
     gallery_set = competitionSet(config["gallery_data"])
+
 
     # data loaders
     query_loader = torch.utils.data.DataLoader(query_set, config["batch_size"], shuffle=False)
