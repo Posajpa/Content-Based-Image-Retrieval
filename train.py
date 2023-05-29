@@ -3,8 +3,9 @@ import time
 import torch
 from pathlib import Path
 import yaml
-from model import VGG
-from model import ResNet
+from model import VGG16
+from model import ResNet50
+from model import EfficientNet
 from dataset import get_train_data
 from utils import seed_everything
 from torchsummary import summary
@@ -127,7 +128,7 @@ if __name__ == "__main__":
     # Misc
     parser.add_argument("--config_path", required=False, type=str, default="./config/config.yaml",
                         help="Path to the configuration file")
-    parser.add_argument("--model_name", choices=["VGG16", "ResNet"], required=True, help="Name of the model used")
+    parser.add_argument("--model_name", choices=["VGG16", "ResNet50", "EfficientNet"], required=True, help="Name of the model used")
     parser.add_argument("--checkpoint_path", required=False, type=str, default="./checkpoints",
                         help="path where the checkpoints will be stored")
     opt = parser.parse_args()  # parse the arguments, this creates a dictionary name : value
@@ -156,11 +157,14 @@ if __name__ == "__main__":
 
     # Create the model
     if opt.model_name == "VGG16":
-        model = VGG(config, out_layer)
-    if opt.model_name == "ResNet":
-        model = ResNet(config, out_layer)
-    print(f"\tModel selected: " + opt.model_name)
+        model = VGG16(config, out_layer)
+    if opt.model_name == "ResNet50":
+        model = ResNet50(config, out_layer)
+    if opt.model_name == "EfficientNet":
+        model = EfficientNet(config, out_layer)
     summary(model)
+
+    print(f"\tModel selected: " + opt.model_name)
     print('-----------------------------------------------------')
     model.to(config["device"])
 
