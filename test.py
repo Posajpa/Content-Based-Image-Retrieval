@@ -6,8 +6,9 @@ from dataset import get_test_data
 import torch
 from pathlib import Path
 import yaml
-from model import VGG
-from model import ResNet
+from model import VGG16
+from model import ResNet50
+from model import EfficientNet
 from utils import seed_everything
 
 
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser("Testing Parser")
     # Misc
-    parser.add_argument("--model_name", choices=["VGG16", "ResNet"], required=True, help="Name of the model used")
+    parser.add_argument("--model_name", choices=["VGG16", "ResNet50", "EfficientNet"], required=True, help="Name of the model used")
     parser.add_argument("--checkpoint_path", required=False, type=str, default="./checkpoints",
                         help="Path of the checkpoints to test.")
     # Dataset parameters
@@ -87,9 +88,12 @@ if __name__ == "__main__":
 
     # Create the model & Load the weights
     if opt.model_name == "VGG16":
-        model = VGG(config, config["out_layer_size"])
-    if opt.model_name == "ResNet":
-        model = ResNet(config, config["out_layer_size"])
+        model = VGG16(config, config["out_layer_size"])
+    if opt.model_name == "ResNet50":
+        model = ResNet50(config, config["out_layer_size"])
+    if opt.model_name == "EfficientNet":
+        model = EfficientNet(config, config["out_layer_size"])
+
     ckpt = torch.load(checkpoint_path / "best.pth", map_location="cpu")
     model.load_state_dict(ckpt)
     model.to(config["device"])
