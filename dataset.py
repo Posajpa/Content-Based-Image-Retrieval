@@ -4,6 +4,8 @@ import glob
 import os
 import pandas as pd
 import PIL.Image as Image
+import numpy as np
+import cv2
 
 
 
@@ -39,7 +41,7 @@ class FaceDataset(torch.utils.data.Dataset):
         label = self.labels[idx]
         name = self.names[idx]
         img = Image.open(self.image_paths[idx]).convert("RGB")
-        # img = crop_face(img, name)
+        # img = crop_face(img)
         img = self.transform(img)  # preprocessed image
         return img, name, label
 
@@ -63,6 +65,32 @@ def get_train_data(config):
 
     return train_loader, val_loader, out_layer
 
+def crop_face(input_image):
+    # convert to grayscale of each frames
+    input_image_np = np.array(input_image)
+    gray = cv2.cvtColor(input_image_np, cv2.COLOR_BGR2GRAY)
+
+    # read the haarcascade to detect the faces in an image
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
+
+    # detects faces in the input image
+    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
+    cropped_face = []
+    # loop over all detected faces
+    if len(faces) > 0:
+        for i, (x, y, w, h) in enumerate(faces):
+            # To draw a rectangle in a face
+            dx = w * 0.1
+            dy = h * 0.1
+            cv2.rectangle(input_image_np, (x, y), (x + w, y + h), (0, 255, 255), 2)
+            face = input_image_np[y:y + h, x:x + w]
+            cropped_face.append(face)
+    if len(cropped_face) != 0:
+        out = Image.fromarray(cropped_face[0])
+    else:
+        out = input_image
+    return out
 
 class competitionSet(torch.utils.data.Dataset):
     def __init__(self, path):
@@ -83,17 +111,15 @@ class competitionSet(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         # open the image
         img = Image.open(self.image_paths[idx]).convert("RGB")  # convert rgb images to grayscale
+        img = crop_face(img)
         img = self.transform(img)
-
-        # get the image name
-        # img_name = os.path.basename(self.image_paths[idx]).split(".")[0]
         img_name = os.path.basename(self.image_paths[idx])
         return img, img_name
 
 
 def get_test_data(config):
-    query_set = competitionSet(config["query_data"])
-    gallery_set = competitionSet(config["gallery_data"])
+    query_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query")
+    gallery_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery")
 
 
     # data loaders
@@ -101,3 +127,9 @@ def get_test_data(config):
     gallery_loader = torch.utils.data.DataLoader(gallery_set, config["batch_size"], shuffle=False)
 
     return query_loader, gallery_loader
+
+def get_query_and_gallery(config):
+    query_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query")
+    gallery_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery")
+
+    return query_set, gallery_set
