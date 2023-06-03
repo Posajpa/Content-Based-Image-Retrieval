@@ -29,12 +29,11 @@ class TransferLearningTrainer:
 
     def save(self, net, epoch, is_best=False):
         if is_best:
-            torch.save(net.state_dict(), self.checkpoint_path / f'best.pth')  # in this case we store only the model
+            torch.save(net.state_dict(), self.checkpoint_path / f'best.pth')
         else:
             save_dict = dict(
                 model=net.state_dict(),
                 optimizer=self.optimizer.state_dict(),
-                # optimizer has parameters as well, you want to save this to be able to go back to this exact stage of training
             )
             torch.save(save_dict, self.checkpoint_path / f'epoch-{epoch}.pth')
 
@@ -53,10 +52,6 @@ class TransferLearningTrainer:
                 '\tEpoch {}: Training loss {:.4f}, Training accuracy {:.4f}, Validation loss {:.4f}, '
                 'Validation accuracy {:.4f}, Best accuracy {:.4f}'.format(
                     e + 1, train_loss, train_accuracy, val_loss, val_accuracy, best_val_accuracy))
-            # # Save the model checkpoints
-            # if e % self.save_checkpoint_every == 0 or e == (
-            #         self.max_epochs - 1):  # if the current epoch is in the interval, or is the last epoch -> save
-            #     torch.save(net.state_dict(), self.checkpoint_path / f'epoch-{e}.pth')
 
             # Update the best model so far
             if val_accuracy >= best_val_accuracy:
