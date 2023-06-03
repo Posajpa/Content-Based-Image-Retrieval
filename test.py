@@ -11,7 +11,6 @@ from model import ResNet50
 from model import EfficientNet
 from utils import seed_everything
 
-
 def feature_extraction(config, query_loader, gallery_loader, model):
     feature_query = dict()
     feature_gallery = dict()
@@ -19,13 +18,13 @@ def feature_extraction(config, query_loader, gallery_loader, model):
     with torch.no_grad():
         for data, names in query_loader:
             data = data.to(config["device"])
-            output = model.get_feature_layer(data).cpu().numpy()
+            output = model.inference(data).to(config["device"]).cpu().numpy()
 
             for i, j in zip(names, output):
                 feature_query[i] = j
         for data, names in gallery_loader:
             data = data.to(config["device"])
-            output = model.get_feature_layer(data).cpu().numpy()
+            output = model.inference(data).to(config["device"]).cpu().numpy()
             for i, j in zip(names, output):
                 feature_gallery[i] = j
     return feature_query, feature_gallery
@@ -35,15 +34,17 @@ def find_distance(array1, array2):
     return np.linalg.norm(array1 - array2)
 
 
-def submit(results, url="http://kamino.disi.unitn.it:3001/results/"):
+def submit(results, url="https://competition-production.up.railway.app/results/"):
     res = json.dumps(results)
-    # print(res)
     response = requests.post(url, res)
     try:
         result = json.loads(response.text)
         print(f"accuracy is {result['results']}")
+        return result
     except json.JSONDecodeError:
         print(f"ERROR: {response.text}")
+        return None
+
 
 
 def take(n, iterable):
@@ -58,11 +59,7 @@ def find_similarity(feature_query, feature_gallery, N):
         for g_name, g_feature in feature_gallery.items():
             distance = find_distance(q_feature, g_feature)  # returns distance score
             tmp[g_name] = distance
-
-        # tmp = {k: v for k, v in sorted(tmp.items(), key=lambda item: item[1], reverse=True)}  # sort tmp by values
         tmp = {k: v for k, v in sorted(tmp.items(), key=lambda item: item[1])}  # sort tmp by values
-        # result[q_name] = list(tmp.keys())
-
         result[q_name] = take(N, tmp.keys())
     return result
 
@@ -96,20 +93,21 @@ if __name__ == "__main__":
 
     ckpt = torch.load(checkpoint_path / "best.pth", map_location="cpu")
     model.load_state_dict(ckpt)
+    model.eval()
     model.to(config["device"])
 
     query_loader, gallery_loader = get_test_data(config)
     # Get feature extractions
     feature_query, feature_gallery = feature_extraction(config=config, query_loader=query_loader, gallery_loader=gallery_loader, model=model)
     # similarity for each query img to feature gallery images
-    top_n = 20
+    top_n = 10
     result = find_similarity(feature_query, feature_gallery, top_n)
 
     # preparation for submit
-    query_random_guess = dict()
-    query_random_guess['Group name'] = "Capybara"
-    query_random_guess["Images"] = result
+    mydata = dict()
+    mydata['groupname'] = "Capybara"
+    mydata["images"] = result
     with open('data.json', 'w') as f:
-        json.dump(query_random_guess, f)
+        json.dump(mydata, f)
 
-    # result = submit(query_random_guess)
+    submit(mydata)
