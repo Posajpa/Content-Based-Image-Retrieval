@@ -17,18 +17,16 @@ class VGG16(nn.Module):
         for i, param in enumerate(self.net.features.parameters()):
             if i < 10:
                 param.requires_grad = False
-        self.base = self.net
         self.logSoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        x = self.base(x)
+        x = self.net(x)
         output = self.logSoftmax(x)
         return output
 
-    def get_feature_layer(self, x):
-        x = self.base(x)
-        # x = self.fc1(x)
-        return x
+    @torch.no_grad()
+    def inference(self, x):
+        return self.net(x)
 
 
 class ResNet50(nn.Module):
@@ -45,17 +43,16 @@ class ResNet50(nn.Module):
         for i, param in enumerate(self.net.parameters()):
             if i < 10:
                 param.requires_grad = False
-        self.base = self.net
         self.logSoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        x = self.base(x)
+        x = self.net(x)
         output = self.logSoftmax(x)
         return output
 
-    def get_feature_layer(self, x):
-        x = self.base(x)
-        return x
+    @torch.no_grad()
+    def inference(self, x):
+        return self.net(x)
 
 
 class EfficientNet(nn.Module):
@@ -72,14 +69,13 @@ class EfficientNet(nn.Module):
         for i, param in enumerate(self.net.parameters()):
             if i < 10:
                 param.requires_grad = False
-        self.base = self.net
         self.logSoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
-        x = self.base(x)
+        x = self.net(x)
         output = self.logSoftmax(x)
         return output
 
-    def get_feature_layer(self, x):
-        x = self.base(x)
-        return x
+    @torch.no_grad()
+    def inference(self, x):
+        return self.net(x)
