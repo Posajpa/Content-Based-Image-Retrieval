@@ -118,8 +118,8 @@ class competitionSet(torch.utils.data.Dataset):
 
 
 def get_test_data(config):
-    query_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query")
-    gallery_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery")
+    query_set = competitionSet(config["query_data"])
+    gallery_set = competitionSet(config["gallery_data"])
 
 
     # data loaders
@@ -127,9 +127,3 @@ def get_test_data(config):
     gallery_loader = torch.utils.data.DataLoader(gallery_set, config["batch_size"], shuffle=False)
 
     return query_loader, gallery_loader
-
-def get_query_and_gallery(config):
-    query_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query")
-    gallery_set = competitionSet("C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery")
-
-    return query_set, gallery_set
