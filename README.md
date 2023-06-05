@@ -1,4 +1,4 @@
-# Introduction to machine learning competition 2023
+# Introduction to machine learning competition project 2023
 ## General info
 In this project we will create an image search engine where a query image is fed to one of the three models (ResNet50, VGG16 and EfficientNet) and will return the most N similar images from a gallery.
  ## Requirements
