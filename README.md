@@ -8,3 +8,6 @@ This project requires Python and the following Python libraries installed:
 - [OpenCV](https://opencv.org/)
 - [yaml](https://pyyaml.org/wiki/PyYAMLDocumentation) 
 - [Requests](https://pypi.org/project/requests/)
+## Run
+1. Set the values for the variables and paths on the `config/config.yaml` file.
+2. 
