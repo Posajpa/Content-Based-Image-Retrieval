@@ -22,3 +22,6 @@ batch_size: 16
 #train_data_labels: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/Dataset4/labels.txt"
 #val_split_req: True
 #batch_size: 64
+
+query_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query"
+gallery_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery"
