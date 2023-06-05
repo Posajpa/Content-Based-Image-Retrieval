@@ -4,7 +4,6 @@ In this project we will create an image search engine where a query image is fed
 This project requires Python and the following Python libraries installed:
 - [NumPy](http://www.numpy.org/)
 - [Pandas](http://pandas.pydata.org/)
-- [matplotlib](http://matplotlib.org/)
 - [PyTorch](https://pytorch.org/)
 - [OpenCV](https://opencv.org/)
 - [yaml](https://pyyaml.org/wiki/PyYAMLDocumentation) 
