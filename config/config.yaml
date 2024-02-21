@@ -6,10 +6,10 @@ max_epochs: 20
 save_checkpoint_every: 5
 early_stopping_patience: 8
 
-train_data_labels: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/Dataset3/identity_CelebA_under_1000.txt"
-train_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/Dataset3/img_celeba_under_1000_cropped"
+train_data_labels: "path to identity_CelebA_under_1000.txt"
+train_data: "path to img_celeba_under_1000_cropped"
 val_split_req: True
 batch_size: 16
 
-query_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/query"
-gallery_data: "C:/Users/Posajpa/PycharmProjects/Machine_Learning/test_data/gallery"
+query_data: "path to test_data/query"
+gallery_data: "path to test_data/gallery"
